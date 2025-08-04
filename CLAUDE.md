@@ -1,268 +1,244 @@
-# 2025 금융 AI Challenge Track1 - 프로젝트 지침
+# FSKU 프로젝트 가이드 (Claude Code용)
 
 ## 🎯 프로젝트 개요
-- **대회명**: 2025 금융 AI Challenge Track1 - 금융보안 특화 AI 모델 경쟁
-- **목표**: FSKU 평가지표 문항에 대해 정확한 응답을 생성하는 단일 LLM 모델 개발
-- **핵심 제약**: 단일 LLM, 오프라인 환경, RTX 4090 24GB, 270분 내 515문항 처리
+- **대회명**: 2025 금융 AI Challenge Track1
+- **목표**: FSKU 평가 문항에 정확히 응답하는 단일 LLM 개발
+- **핵심 제약**: 
+  - 단일 LLM만 사용
+  - 오프라인 환경
+  - RTX 4090 24GB
+  - 270분 내 515문항 처리
 
-## 📌 전체 응답 원칙
-1. **규칙 준수 최우선**: 모든 제안과 구현은 대회 규칙을 엄격히 준수
-2. **실용적 접근**: RTX 4090 24GB와 270분 제한을 항상 고려
-3. **품질 > 양**: 데이터 증강 시 무작정 늘리기보다 고품질 데이터 생성
-4. **문서화 철저**: 모든 결정사항과 코드는 재현 가능하도록 문서화
+## 📂 현재 프로젝트 구조 (정리 완료!)
 
-## 📁 프로젝트 구조
 ```
 ai-dacon/
-├── data/
-│   ├── test.csv (515문항) - 추론용만, 학습 금지 ⚠️
-│   ├── sample_submission.csv - 제출 형식
-│   ├── external/ - 외부 수집 데이터
-│   ├── augmented/ - 증강된 데이터
-│   └── processed/ - 전처리된 데이터
-├── docs/ - 상세 문서
-│   ├── rules/ - 대회 규칙
-│   │   └── competition_rules.md
-│   ├── data/ - 데이터 관련
-│   │   └── external_data_sources.md
-│   ├── generate_data/ - 데이터 생성 가이드
-│   │   ├── analyze_test_file.md - 테스트 데이터 분석
-│   │   └── difficult.md - 고난도 문제 생성 전략
-│   ├── models/ - 모델 선정
-│   │   └── model_selection_guide.md
-│   ├── technical/ - 기술 가이드
-│   │   └── optimization_guide.md
-│   └── reports/ - 프로젝트 리포트
-│       └── cot_integration_status.md
-├── src/
-│   ├── config/
-│   │   ├── __init__.py
-│   │   └── settings.py # 프로젝트 전역 설정 관리
-│   ├── data_augmentation/ # 데이터 증강 핵심 모듈
-│   │   ├── __init__.py
-│   │   ├── augmentation_pipeline.py # 전체 증강 프로세스 통합 관리
-│   │   ├── cot_generator.py # Chain-of-Thought 추론 과정 생성
-│   │   ├── data_loader.py # 외부 데이터 로딩 및 전처리
-│   │   ├── knowledge_extractor.py # 금융 지식 추출 및 구조화
-│   │   ├── quality_checker.py # 생성 데이터 품질 검증
-│   │   ├── question_generator.py # FSKU 형식 문제 생성
-│   │   └── reasoning_templates.py # CoT 추론 템플릿 정의
-│   ├── run_augmentation_with_cot.py # ⭐ CoT 기반 증강 메인 실행
-│   └── utils/ # 공통 유틸리티 함수
-├── scripts/ - 실행 스크립트
-│   ├── run_augmentation.py - 기본 증강 실행
-│   └── validate_data.py - 데이터 검증
-├── notebooks/ - 실험 노트북
-├── tests/ - 테스트 코드
-├── requirements.txt - 의존성 패키지
-├── README.md - 프로젝트 소개
-└── CLAUDE.md (현재 파일)
+├── 📌 main.py                    # ⭐ 메인 실행 파일
+│
+├── src/                          # 핵심 코드 (기능별 정리)
+│   ├── generate_data/            # 데이터 생성
+│   │   ├── main.py              # 생성 메인
+│   │   ├── concept_extractor.py # 외부 데이터 기반 추출
+│   │   └── quality_checker.py   # 품질 검증
+│   │
+│   ├── training/                 # 모델 학습
+│   │   └── train.py             # LoRA/QLoRA 학습
+│   │
+│   ├── infer/                    # 추론
+│   │   └── inference.py         # 모델 추론
+│   │
+│   └── rag/                      # RAG
+│       └── retriever.py         # 문서 검색
+│
+├── data/                         # 데이터
+│   ├── external/                # 외부 문서 (필수!)
+│   ├── augmented/               # 생성된 데이터
+│   └── test.csv                 # 테스트 (학습 금지!)
+│
+├── prompts/                      # 프롬프트 템플릿
+└── results/                      # 실행 결과
 ```
 
-## 📋 핵심 규칙 요약
+## 📋 핵심 규칙
 
 ### ✅ 허용
-- 2025.07.31 이전 공개된 오픈소스 모델/데이터
-- 로컬 실행 가능한 모델
-- RAG (생성 모델의 요약/재구성 필수)
-- 데이터 증강 (로컬 모델 활용)
-- LoRA/QLoRA 파인튜닝
+- 2025.07.31 이전 공개 오픈소스
+- 로컬 실행 가능 모델
+- RAG (재구성 필수)
+- 데이터 증강 (외부 데이터 기반)
+- LoRA/QLoRA
 
 ### ❌ 금지
 - test.csv 학습/검증 사용
 - 복수 LLM 앙상블
-- 외부 API (OpenAI, Gemini 등)
-- 직접 수집 데이터 (크롤링, 수기작성)
+- 외부 API (OpenAI 등)
+- **수기 작성 데이터**
 - 상업적 라이선스
 
 ## 🚀 Quick Start
 
-### 1. 환경 설정
 ```bash
-# Python 3.10, CUDA 11.8, PyTorch 2.1.0
+# 1. 설치
 pip install -r requirements.txt
+
+# 2. 외부 데이터 준비 (필수!)
+# data/external/ 폴더에 금융 문서 추가
+
+# 3. 실행
+python main.py
 ```
 
-### 2. 모델 선정
-- **최우선**: LG EXAONE 3.0 (7.8B)
-- **대안**: beomi/SOLAR-10.7B
-- 상세 내용: [모델 선정 가이드](docs/models/model_selection_guide.md)
+## 💡 핵심 워크플로우
 
-### 3. 데이터 수집
-- 우선순위별 외부 데이터 목록: [데이터 소스](docs/data/external_data_sources.md)
-- 라이선스 확인 필수
-
-### 4. 최적화
-- 4bit 양자화, vLLM, 배치 처리
-- 상세 내용: [최적화 가이드](docs/technical/optimization_guide.md)
-
-### 5. 데이터 증강 실행 (CoT 포함)
-```bash
-# Chain-of-Thought 추론을 포함한 데이터 증강
-python src/run_augmentation_with_cot.py --num_variations 5
+### 1️⃣ 데이터 생성 (`src/generate_data/`)
+```python
+# 외부 데이터 기반 자동 추출 (수기 작성 X)
+1. ConceptExtractor: 외부 문서에서 개념 추출
+2. DocumentRetriever: RAG로 관련 문서 검색  
+3. DataGenerator: LLM으로 문제 생성
+4. QualityChecker: 품질 평가 (70점 이상만)
 ```
+
+### 2️⃣ 모델 학습 (`src/training/`)
+```python
+# QLoRA로 메모리 효율적 학습
+1. 데이터 로드 (생성된 데이터)
+2. QLoRA 4bit 설정
+3. LoRA 파인튜닝
+4. 모델 저장
+```
+
+### 3️⃣ 추론 (`src/infer/`)
+```python
+# 270분 내 515문항 처리
+1. 모델 로드
+2. 배치 처리
+3. 결과 저장
+```
+
+## 🔧 최적화 전략
+
+### 메모리 (RTX 4090 24GB)
+```python
+# QLoRA 필수
+use_qlora=True
+batch_size=2-4
+gradient_accumulation=4-8
+```
+
+### 속도 (270분 제한)
+- 배치 처리 최대화
+- 캐싱 활용
+- vLLM 검토
 
 ## 📊 평가 지표
 ```
-Score = 0.5 × 객관식 정확도 + 0.5 × 주관식 점수
-주관식 = 0.6 × 의미 유사도 + 0.4 × 키워드 재현율
+Score = 0.5 × 객관식 + 0.5 × 주관식
+주관식 = 0.6 × 의미유사도 + 0.4 × 키워드재현율
 ```
 
-## 📅 마일스톤
-- [ ] Week 1: 데이터 수집 및 라이선스 확인
-- [ ] Week 2: 모델 학습 (LoRA/QLoRA)
-- [ ] Week 3: 추론 최적화 (270분 내)
-- [ ] Week 4: 최종 검증 및 제출
+## ⚠️ 주의사항
 
-## 🔗 상세 문서
-- [대회 규칙 전문](docs/rules/competition_rules.md)
-- [외부 데이터 소스 목록](docs/data/external_data_sources.md)
-- [테스트 데이터 분석](docs/generate_data/analyze_test_file.md)
-- [고난도 문제 생성 전략](docs/generate_data/difficult.md)
-- [모델 선정 가이드](docs/models/model_selection_guide.md)
-- [최적화 가이드](docs/technical/optimization_guide.md)
-- [CoT 통합 현황](docs/reports/cot_integration_status.md)
+1. **test.csv 절대 학습 금지** - 실격 사유
+2. **외부 데이터 필수** - data/external/ 확인
+3. **수기 작성 금지** - 자동 추출만 사용
+4. **단일 모델** - 앙상블 불가
 
-## ⚠️ 중요 체크포인트
-1. **RunPod 사용 가능 여부** - 공식 문의 필요
-2. **test.csv는 절대 학습에 사용 금지**
-3. **단일 LLM 모델로만 추론**
-4. **270분 시간 제한 엄수**
-5. **모든 외부 데이터 출처 증빙**
+## 🎮 주요 명령
 
-## 📝 작업별 세부 지침
-
-### 1. 데이터 수집 및 증강 작업 시
-- **test.csv 절대 사용 금지**: Data Leakage 규칙 위반 시 실격
-- **외부 데이터 우선**: 공개된 금융 교육자료, 자격증 문제 등 활용
-- **라이선스 철저 확인**: 2025.07.31 이전, 비상업적 라이선스만
-- **금융 보안 도메인 특화**: 금융 보안에 관련된 용어와 맥락을 활용한 창의적 변형
-- **다양성 확보**: 동일 개념에 대해 3-5개 변형 생성
-- **변형 전략**:
-  - 난이도 변경 (쉽게/어렵게)
-  - 문제 유형 변경 (객관식↔주관식)
-  - 상황 응용 (다른 금융 시나리오 적용)
-  - 심화 문제 (원본 개념을 확장)
-- **품질 검증**: 금융 개념의 정확성과 문제의 타당성 확인
-- **메타데이터 기록**: 데이터 출처, 라이선스, 변형 방법 필수 기록
-
-#### run_augmentation_with_cot.py 사용법
-**목적**: Chain-of-Thought (CoT) 추론을 활용한 고품질 데이터 증강
-
-**핵심 기능**:
-1. **지식 추출**: 원본 데이터에서 핵심 개념과 관계 추출
-2. **CoT 생성**: 단계별 추론 과정 자동 생성
-3. **문제 변형**: 다양한 난이도와 유형으로 변형
-4. **품질 검증**: 생성된 데이터의 정확성과 일관성 검증
-
-**실행 명령**:
 ```bash
-# 기본 실행 (5개 변형 생성)
-python src/run_augmentation_with_cot.py --num_variations 5
+# 데이터 생성
+python main.py generate
 
-# 고급 옵션
-python src/run_augmentation_with_cot.py \
-  --num_variations 3 \
-  --difficulty_levels "easy,medium,hard" \
-  --include_explanations \
-  --validate_answers
+# 모델 학습  
+python main.py train
+
+# 추론
+python main.py infer <model> <test>
+
+# 전체 파이프라인
+python main.py pipeline
 ```
 
-**생성 데이터 구조**:
-- 원본 문제 + CoT 추론 과정
-- 변형 문제 (난이도별)
-- 정답 및 상세 해설
-- 메타데이터 (출처, 변형 방법, 검증 결과)
+## 📁 핵심 파일 역할
 
-### 2. 모델 학습 작업 시
-- **효율성 우선**: LoRA/QLoRA 활용하여 메모리 효율적 학습
-- **체크포인트 관리**: 주기적 저장 및 최적 체크포인트 선택
-- **학습 로그**: 손실값, 검증 지표 등 상세 기록
-- **하이퍼파라미터**: 작은 값부터 시작하여 점진적 조정
+- `main.py`: 통합 실행 인터페이스
+- `src/generate_data/main.py`: 데이터 생성 엔진
+- `src/generate_data/concept_extractor.py`: 외부 데이터 개념 추출
+- `src/training/train.py`: LoRA/QLoRA 학습
+- `src/infer/inference.py`: 모델 추론
+- `src/rag/retriever.py`: RAG 문서 검색
 
-### 3. 추론 최적화 작업 시
-- **시간 측정**: 각 단계별 소요 시간 프로파일링
-- **배치 처리**: 가능한 최대 배치 크기 활용
-- **캐싱 전략**: 반복 계산 최소화
-- **양자화 검토**: 4bit/8bit 양자화로 속도 향상
-- **vLLM 고려**: 추론 속도 향상을 위한 도구 검토
+## 🏆 추천 모델
 
-### 4. 코드 작성 시
+1. **beomi/SOLAR-10.7B-v1.0** (추천) - 한국어 최적화
+2. **LG-AI-EXAONE/EXAONE-3.0-7.8B-Instruct** - LG AI 연구소
+3. **Qwen/Qwen2.5-7B-Instruct** - 다국어 성능 우수
+4. beomi/llama-2-ko-7b - 한국어 파인튜닝
+
+## 📝 개발 원칙 (중요!)
+
+### 파일 관리 원칙
+1. **레거시 파일 제거**: 불필요한 파일은 즉시 삭제
+2. **기존 파일 우선 수정**: 
+   - 새 파일 생성 ❌ → 기존 파일 수정 ✅
+   - 기능 추가시 관련 파일에 통합
+   - 파일 수는 최소한으로 유지 (현재 7개)
+3. **명확한 파일 구조**:
+   - 기능별 폴더 구분 유지
+   - 중복 코드 제거
+
+### 코드 작성 규칙
 ```python
-# 모든 코드는 다음 구조를 따름:
-# 1. 명확한 docstring
-# 2. 타입 힌트 사용
-# 3. 에러 처리 포함
-# 4. 로깅 구현
-# 5. 상대 경로 사용
-
-def function_name(param: type) -> return_type:
+# ✅ 좋은 예시 - 상세한 한글 주석
+def extract_concepts(self, text: str) -> List[str]:
     """
-    함수 설명
+    외부 데이터에서 금융 개념 추출
     
     Args:
-        param: 파라미터 설명
+        text: 분석할 텍스트
     
     Returns:
-        반환값 설명
+        추출된 개념 리스트
     """
-    try:
-        # 구현
-        logging.info("작업 내용")
-        return result
-    except Exception as e:
-        logging.error(f"에러 발생: {e}")
-        raise
+    # 1. 금융 용어 패턴 매칭
+    patterns = [...]
+    
+    # 2. 빈도수 기반 가중치 계산
+    weights = self._calculate_weights(...)
+    
+    # 3. 상위 N개 개념 선택
+    return top_concepts
+
+# ❌ 나쁜 예시 - 주석 없음
+def extract_concepts(self, text: str) -> List[str]:
+    patterns = [...]
+    weights = self._calculate_weights(...)
+    return top_concepts
 ```
 
-### 5. 문제 해결 접근법
-1. **문제 발생 시**:
-   - 먼저 대회 규칙 재확인
-   - 유사 사례 검색
-   - 단계별 디버깅
-   - 대안 솔루션 준비
+### 주석 작성 규칙
+1. **모든 함수에 docstring 필수**
+2. **복잡한 로직은 단계별 주석**
+3. **변수명이 불명확하면 주석 추가**
+4. **한글 주석 사용** (이해도 향상)
+5. **TODO, FIXME 명시적 표시**
 
-2. **불확실한 사항**:
-   - RunPod 같은 애매한 케이스는 즉시 문의
-   - 보수적 해석 적용 (허용 안 됨으로 가정)
-   - Plan B 준비
+### 언어 사용 규칙
+1. **모든 출력 메시지 한글 사용**
+   - print문, 로그, 에러 메시지 모두 한글
+   - 진행 상황, 결과 보고 한글
+2. **변수명/함수명은 영어** (Python 관례)
+3. **주석과 문서는 한글**
 
-### 6. 일일 작업 우선순위
-1. **최우선**: 외부 금융 데이터 소스 발굴 및 라이선스 확인
-2. **긴급**: RunPod 문의, 규칙 확인 사항
-3. **중요**: 수집 데이터 기반 문제 생성
-4. **필수**: 추론 시간 테스트
-5. **추가**: 성능 최적화, 문서화
+### 코드 수정시 체크리스트
+- [ ] 레거시 코드 제거했는가?
+- [ ] 기존 파일에 통합 가능한가?
+- [ ] 충분한 주석을 달았는가?
+- [ ] 중복 코드는 없는가?
+- [ ] 파일 수가 증가하지 않았는가?
 
-## 🚨 위험 관리
-- **데이터 누수**: 테스트 데이터 절대 학습에 사용 금지
-- **시간 초과**: 매 구현마다 추론 시간 체크
-- **메모리 부족**: OOM 방지를 위한 배치 크기 조정
-- **재현성**: 모든 랜덤 시드 고정
+## 📅 마일스톤
 
-## 💡 전략적 조언
-1. **경쟁자 대비 차별화**:
-   - 금융 도메인 지식 최대한 활용
-   - 프롬프트 엔지니어링으로 하드웨어 한계 극복
-   - 데이터 품질로 승부
+- [x] 프로젝트 구조 정리
+- [ ] 외부 데이터 수집
+- [ ] 데이터 증강 (5000개+)
+- [ ] 모델 학습
+- [ ] 추론 최적화 (270분)
+- [ ] 최종 제출
 
-2. **시간 관리**:
-   - 완벽보다는 작동하는 버전 먼저
-   - 점진적 개선 approach
-   - 제출 횟수 전략적 활용 (1일 3회)
+### 출력 예시
+```python
+# ✅ 좋은 예시
+print("데이터 생성 중...")
+print(f"✅ 완료! 총 {count}개 생성됨")
+print(f"⚠️ 경고: 메모리 부족 (현재: {mem}GB)")
 
-3. **협업 시**:
-   - 모든 공유는 DACON 플랫폼 내에서만
-   - Private sharing 절대 금지
-   - 코드 버전 관리 철저
-
-## 📍 항상 기억할 것
-- "단일 LLM 모델"이 핵심 제약
-- 오프라인 환경에서 작동 필수
-- 270분 내 515문항 처리
-- 모든 외부 자원은 2025.07.31 이전 공개
+# ❌ 나쁜 예시  
+print("Loading data...")
+print(f"Done! Generated {count} items")
+```
 
 ---
-**Last Updated**: 2025-08-04
-**Version**: 4.2 (generate_data 문서 및 파일 역할 설명 추가)
-**Author**: AI Assistant for DACON Competition
+**Last Updated**: 2025-01-04
+**Version**: 5.1 (개발 원칙 추가)
