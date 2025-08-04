@@ -1,0 +1,50 @@
+{
+    "mcpServers": {
+		"brave-search": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"@modelcontextprotocol/server-brave-search"
+			],
+			"env": {
+				"BRAVE_API_KEY": "BSAYojVERnAXAOpUCNrvkI4lmeaFcKQ"
+			}
+		},
+		"perplexity-ask": {
+			"command": "npx",
+			"args": [
+			  "-y",
+			  "server-perplexity-ask"
+			],
+			"env": {
+			  "PERPLEXITY_API_KEY": "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"
+			}
+		  },
+		"Context7": {
+			"command": "npx",
+			"args": ["-y", "@upstash/context7-mcp"]
+		},
+		"sequential-thinking": {
+            "command": "npx",
+            "args": [
+              "-y",
+              "@modelcontextprotocol/server-sequential-thinking"
+            ]
+		},
+		"taskmaster-ai": {
+			"command": "npx",
+			"args": ["-y", "--package=task-master-ai", "task-master-ai"],
+			"env": {
+				"ANTHROPIC_API_KEY": "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",
+				"PERPLEXITY_API_KEY": "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",
+				"OPENAI_API_KEY": "YOUR_OPENAI_KEY_HERE",
+				"GOOGLE_API_KEY": "YOUR_GOOGLE_KEY_HERE",
+				"MISTRAL_API_KEY": "YOUR_MISTRAL_KEY_HERE",
+				"OPENROUTER_API_KEY": "YOUR_OPENROUTER_KEY_HERE",
+				"XAI_API_KEY": "YOUR_XAI_KEY_HERE",
+				"AZURE_OPENAI_API_KEY": "YOUR_AZURE_KEY_HERE",
+				"OLLAMA_API_KEY": "YOUR_OLLAMA_API_KEY_HERE"
+			}
+		}
+	}
+}
