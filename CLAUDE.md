@@ -25,6 +25,9 @@ ai-dacon/
 │   │   └── competition_rules.md
 │   ├── data/ - 데이터 관련
 │   │   └── external_data_sources.md
+│   ├── generate_data/ - 데이터 생성 가이드
+│   │   ├── analyze_test_file.md - 테스트 데이터 분석
+│   │   └── difficult.md - 고난도 문제 생성 전략
 │   ├── models/ - 모델 선정
 │   │   └── model_selection_guide.md
 │   ├── technical/ - 기술 가이드
@@ -34,18 +37,18 @@ ai-dacon/
 ├── src/
 │   ├── config/
 │   │   ├── __init__.py
-│   │   └── settings.py - 설정 관리
-│   ├── data_augmentation/ - 데이터 증강 모듈
+│   │   └── settings.py # 프로젝트 전역 설정 관리
+│   ├── data_augmentation/ # 데이터 증강 핵심 모듈
 │   │   ├── __init__.py
-│   │   ├── augmentation_pipeline.py - 통합 파이프라인
-│   │   ├── cot_generator.py - CoT 생성기
-│   │   ├── data_loader.py - 데이터 로더
-│   │   ├── knowledge_extractor.py - 지식 추출
-│   │   ├── quality_checker.py - 품질 검증
-│   │   ├── question_generator.py - 문제 생성
-│   │   └── reasoning_templates.py - 추론 템플릿
-│   ├── run_augmentation_with_cot.py - CoT 증강 실행 ⭐
-│   └── utils/ - 유틸리티 함수
+│   │   ├── augmentation_pipeline.py # 전체 증강 프로세스 통합 관리
+│   │   ├── cot_generator.py # Chain-of-Thought 추론 과정 생성
+│   │   ├── data_loader.py # 외부 데이터 로딩 및 전처리
+│   │   ├── knowledge_extractor.py # 금융 지식 추출 및 구조화
+│   │   ├── quality_checker.py # 생성 데이터 품질 검증
+│   │   ├── question_generator.py # FSKU 형식 문제 생성
+│   │   └── reasoning_templates.py # CoT 추론 템플릿 정의
+│   ├── run_augmentation_with_cot.py # ⭐ CoT 기반 증강 메인 실행
+│   └── utils/ # 공통 유틸리티 함수
 ├── scripts/ - 실행 스크립트
 │   ├── run_augmentation.py - 기본 증강 실행
 │   └── validate_data.py - 데이터 검증
@@ -114,8 +117,11 @@ Score = 0.5 × 객관식 정확도 + 0.5 × 주관식 점수
 ## 🔗 상세 문서
 - [대회 규칙 전문](docs/rules/competition_rules.md)
 - [외부 데이터 소스 목록](docs/data/external_data_sources.md)
+- [테스트 데이터 분석](docs/generate_data/analyze_test_file.md)
+- [고난도 문제 생성 전략](docs/generate_data/difficult.md)
 - [모델 선정 가이드](docs/models/model_selection_guide.md)
 - [최적화 가이드](docs/technical/optimization_guide.md)
+- [CoT 통합 현황](docs/reports/cot_integration_status.md)
 
 ## ⚠️ 중요 체크포인트
 1. **RunPod 사용 가능 여부** - 공식 문의 필요
@@ -258,5 +264,5 @@ def function_name(param: type) -> return_type:
 
 ---
 **Last Updated**: 2025-08-04
-**Version**: 4.1 (프로젝트 구조 및 CoT 증강 추가)
+**Version**: 4.2 (generate_data 문서 및 파일 역할 설명 추가)
 **Author**: AI Assistant for DACON Competition
