@@ -12,8 +12,22 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent / "src"))
 
 from generate_data.main import generate_data
-from training.train import train_model
-from infer.inference import run_inference
+
+# Training과 Inference는 나중에 임포트
+try:
+    from training.train import train_model
+except ImportError:
+    def train_model(*args, **kwargs):
+        print("❌ 학습 모듈이 설치되지 않았습니다.")
+        print("   pip install peft datasets")
+        return None
+
+try:
+    from infer.inference import run_inference
+except ImportError:
+    def run_inference(*args, **kwargs):
+        print("❌ 추론 모듈이 설치되지 않았습니다.")
+        return None
 
 
 def print_menu():
@@ -36,11 +50,31 @@ def data_generation_menu():
     """데이터 생성 설정"""
     print("\n=== 데이터 생성 설정 ===")
     
+    # 모델 선택
+    print("\n사용할 모델:")
+    print("1. SOLAR-10.7B (한국어 최적화, 느림)")
+    print("2. Llama-VARCO-8B (NCSOFT, 한국어)")
+    print("3. Ko-PlatYi-6B (한국어 특화)")
+    print("4. Llama-2-Ko-7B (beomi)")
+    print("5. Phi-2 (2.7B, 빠름)")
+    print("6. GPT-2 (테스트용)")
+    
+    model_choice = input("선택 [3]: ").strip() or "3"
+    
+    model_map = {
+        "1": "upstage/SOLAR-10.7B-v1.0",
+        "2": "NCSOFT/Llama-VARCO-8B-Instruct",
+        "3": "kyujinpy/Ko-PlatYi-6B",
+        "4": "beomi/llama-2-ko-7b",
+        "5": "microsoft/phi-2",
+        "6": "gpt2"
+    }
+    
     # 기본값 제공
     config = {
-        'model_name': 'beomi/SOLAR-10.7B-v1.0',
+        'model_name': model_map.get(model_choice, "upstage/SOLAR-10.7B-v1.0"),
         'use_rag': True,
-        'use_quantization': True,
+        'use_quantization': False,  # Mac에서는 비활성화
         'num_questions': 100,
         'min_quality': 70,
         'temperature': 0.7,
@@ -135,7 +169,7 @@ def full_pipeline():
     # 1. 데이터 생성
     print("\n[1/3] 데이터 생성")
     data_config = {
-        'model_name': 'beomi/SOLAR-10.7B-v1.0',
+        'model_name': 'upstage/SOLAR-10.7B-v1.0',
         'use_rag': True,
         'num_questions': 100,
         'prompt_template': 'prompts/cot.txt'
@@ -197,7 +231,7 @@ if __name__ == "__main__":
         if command == "generate":
             # 빠른 데이터 생성
             config = {
-                'model_name': 'beomi/SOLAR-10.7B-v1.0',
+                'model_name': 'upstage/SOLAR-10.7B-v1.0',
                 'use_rag': True,
                 'num_questions': 100
             }

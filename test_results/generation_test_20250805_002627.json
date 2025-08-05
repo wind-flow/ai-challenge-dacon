@@ -1,0 +1,10 @@
+{
+  "test_time": "2025-08-05T00:26:27.370843",
+  "model": "LG-AI-EXAONE/EXAONE-3.0-7.8B-Instruct",
+  "templates_tested": [
+    "prompts/diverse_types.txt",
+    "prompts/high_quality.txt",
+    "prompts/training_data.txt"
+  ],
+  "results": []
+}

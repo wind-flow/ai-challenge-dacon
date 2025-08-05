@@ -271,7 +271,7 @@ def train_model(config: Dict[str, Any] = None):
     if config is None:
         # 기본 설정
         config = {
-            'base_model': 'beomi/SOLAR-10.7B-v1.0',
+            'base_model': 'upstage/SOLAR-10.7B-v1.0',
             'use_lora': True,
             'use_qlora': True,
             'lora_r': 16,
@@ -295,10 +295,40 @@ def train_model(config: Dict[str, Any] = None):
     return results
 
 
+def train_model(config: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    모델 학습 메인 함수 (외부 호출용)
+    
+    Args:
+        config: 학습 설정
+        
+    Returns:
+        학습 결과 (모델 경로 등)
+    """
+    trainer = ModelTrainer(
+        base_model_name=config.get('base_model', 'beomi/SOLAR-10.7B-v1.0'),
+        use_lora=config.get('use_lora', True),
+        use_qlora=config.get('use_qlora', True),
+        lora_r=config.get('lora_r', 16),
+        lora_alpha=config.get('lora_alpha', 32),
+        output_dir=config.get('output_dir', 'models')
+    )
+    
+    results = trainer.train(
+        train_data_path=config.get('train_data', 'data/augmented/train_data.jsonl'),
+        valid_data_path=config.get('valid_data'),
+        num_epochs=config.get('num_epochs', 3),
+        batch_size=config.get('batch_size', 4),
+        learning_rate=config.get('learning_rate', 2e-4)
+    )
+    
+    return results
+
+
 if __name__ == "__main__":
     # 테스트 실행
     config = {
-        'base_model': 'beomi/SOLAR-10.7B-v1.0',
+        'base_model': 'upstage/SOLAR-10.7B-v1.0',
         'use_lora': True,
         'use_qlora': True,
         'num_epochs': 1,  # 테스트용

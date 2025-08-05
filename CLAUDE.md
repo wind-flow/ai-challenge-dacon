@@ -27,8 +27,10 @@ ai-dacon/
 │   ├── infer/                    # 추론
 │   │   └── inference.py         # 모델 추론
 │   │
-│   └── rag/                      # RAG
-│       └── retriever.py         # 문서 검색
+│   └── rag/                      # RAG 시스템
+│       ├── retriever.py         # 문서 검색 (캐싱 지원)
+│       ├── pdf_loader.py        # PDF/Excel 문서 로더
+│       └── chunker.py           # 문서 청킹
 │
 ├── data/                         # 데이터
 │   ├── external/                # 외부 문서 (필수!)
@@ -73,11 +75,17 @@ python main.py
 ### 1️⃣ 데이터 생성 (`src/generate_data/`)
 ```python
 # 외부 데이터 기반 자동 추출 (수기 작성 X)
-1. ConceptExtractor: 외부 문서에서 개념 추출
-2. DocumentRetriever: RAG로 관련 문서 검색  
+1. ConceptExtractor: PDF/Excel 문서에서 개념 추출
+2. DocumentRetriever: RAG로 관련 문서 검색 (캐싱 지원)
 3. DataGenerator: LLM으로 문제 생성
 4. QualityChecker: 품질 평가 (70점 이상만)
 ```
+
+#### 🚀 RAG 캐싱 시스템
+- **첫 실행**: PDF 문서 처리 → 인덱스 생성 (약 46초)
+- **이후 실행**: 캐시 자동 로드 (0.02초) - **2,300배 빠름!**
+- **인덱스 위치**: `data/vectordb/index.pkl`
+- **재구축 필요시**: `python rebuild_index.py`
 
 ### 2️⃣ 모델 학습 (`src/training/`)
 ```python
@@ -147,11 +155,11 @@ python main.py pipeline
 - `src/generate_data/concept_extractor.py`: 외부 데이터 개념 추출
 - `src/training/train.py`: LoRA/QLoRA 학습
 - `src/infer/inference.py`: 모델 추론
-- `src/rag/retriever.py`: RAG 문서 검색
+- `src/rag/retriever.py`: RAG 문서 검색 (캐싱 지원)
 
 ## 🏆 추천 모델
 
-1. **beomi/SOLAR-10.7B-v1.0** (추천) - 한국어 최적화
+1. **upstage/SOLAR-10.7B-v1.0** (추천) - 한국어 최적화
 2. **LG-AI-EXAONE/EXAONE-3.0-7.8B-Instruct** - LG AI 연구소
 3. **Qwen/Qwen2.5-7B-Instruct** - 다국어 성능 우수
 4. beomi/llama-2-ko-7b - 한국어 파인튜닝

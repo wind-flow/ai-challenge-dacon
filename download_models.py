@@ -94,7 +94,7 @@ def main():
     
     # 추천 모델 목록
     models = [
-        ("beomi/SOLAR-10.7B-v1.0", "SOLAR 10.7B (추천)", True),
+        ("upstage/SOLAR-10.7B-v1.0", "SOLAR 10.7B (추천)", True),
         ("LG-AI-EXAONE/EXAONE-3.0-7.8B-Instruct", "LG EXAONE 7.8B", True),
         ("Qwen/Qwen2.5-7B-Instruct", "Qwen 2.5 7B (다국어)", True),
         ("beomi/llama-2-ko-7b", "Llama2 한국어 7B", False),

@@ -1,46 +1,40 @@
-# Core ML/NLP libraries
-transformers>=4.36.0
-torch>=2.2.0
-sentence-transformers>=2.2.0
-peft>=0.7.0
-accelerate>=0.25.0
+# FSKU 프로젝트 필수 패키지
 
-# Data processing
+# Core ML/NLP libraries (필수)
+torch>=2.2.0
+transformers>=4.36.0
+accelerate>=0.25.0
+peft>=0.7.0
+
+# Data processing (필수)
 pandas>=2.0.0
 numpy>=1.24.0
-pdfplumber>=0.9.0
-pypdf>=3.17.0
-
-# Korean NLP
-konlpy>=0.6.0
-kiwipiepy>=0.17.1
-
-# Utilities
 tqdm>=4.65.0
-python-dotenv>=1.0.0
-pydantic>=2.5.0
 
-# Development tools (optional)
-# pytest>=7.4.0
-# black>=23.12.0
-# ipykernel>=6.25.0
-# notebook>=7.0.0
+# Tokenizer (필수)
+sentencepiece>=0.1.99
 
-# Logging and monitoring
-loguru>=0.7.2
-rich>=13.7.0
-
-# File handling
-openpyxl>=3.1.2
+# File handling (필수)
 jsonlines>=4.0.0
 
-# Vector store and embeddings (for RAG if needed)
-# chromadb>=0.4.22
-# langchain>=0.1.0
-faiss-cpu>=1.7.4
-
-# Optimization
+# Optimization (권장 - GPU 메모리 절약)
 bitsandbytes>=0.41.3
 
-# 토크나이저
-sentencepiece>=0.1.99
+# RAG support (선택 - RAG 사용시)
+sentence-transformers>=2.2.0
+faiss-cpu>=1.7.4
+
+# Korean NLP (선택 - 한국어 처리 고도화시)
+# konlpy>=0.6.0
+# kiwipiepy>=0.17.1
+PyPDF2>=3.0.1
+# PDF processing (선택 - PDF 문서 처리시)
+# pdfplumber>=0.9.0
+# pypdf>=3.17.0
+
+# Utilities (선택)
+# python-dotenv>=1.0.0
+# pydantic>=2.5.0
+# loguru>=0.7.2
+# rich>=13.7.0
+# openpyxl>=3.1.2

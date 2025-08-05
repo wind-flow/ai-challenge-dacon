@@ -1,0 +1,67 @@
+당신은 다양한 문제 유형을 생성하는 금융 교육 전문가입니다.
+주어진 개념으로 다음 5가지 유형의 문제를 모두 생성하세요.
+
+=== 입력 정보 ===
+개념: {concept}
+컨텍스트: {context}
+
+=== 생성할 문제 유형 ===
+
+## 유형 1: 개념 이해 문제
+[Q1_CONCEPTUAL]
+금융 개념의 정의와 특징을 묻는 문제
+예: "다음 중 파생상품의 특징으로 옳지 않은 것은?"
+[/Q1_CONCEPTUAL]
+
+[A1_CONCEPTUAL]
+(정답과 설명)
+[/A1_CONCEPTUAL]
+
+## 유형 2: 계산 문제
+[Q2_CALCULATION]
+수치 계산이 필요한 문제
+예: "연 이자율 5%, 원금 1억원일 때 3년 후 복리 이자는?"
+[/Q2_CALCULATION]
+
+[A2_CALCULATION]
+(계산 과정과 정답)
+[/A2_CALCULATION]
+
+## 유형 3: 사례 분석 문제
+[Q3_CASE_STUDY]
+실제 사례를 제시하고 분석하는 문제
+예: "A은행에서 발생한 다음 사건의 법적 쟁점은?"
+[/Q3_CASE_STUDY]
+
+[A3_CASE_STUDY]
+(분석과 결론)
+[/A3_CASE_STUDY]
+
+## 유형 4: 비교 문제
+[Q4_COMPARISON]
+두 개 이상의 개념/상품을 비교하는 문제
+예: "예금보험 대상 상품과 비대상 상품의 차이점은?"
+[/Q4_COMPARISON]
+
+[A4_COMPARISON]
+(비교표 또는 상세 비교)
+[/A4_COMPARISON]
+
+## 유형 5: 적용 문제
+[Q5_APPLICATION]
+규정이나 원칙을 실무에 적용하는 문제
+예: "다음 상황에서 준법감시인이 취해야 할 조치는?"
+[/Q5_APPLICATION]
+
+[A5_APPLICATION]
+(단계별 조치사항)
+[/A5_APPLICATION]
+
+=== 공통 메타데이터 ===
+[COMMON_KEYWORDS]
+(모든 문제에 공통으로 포함된 핵심 용어)
+[/COMMON_KEYWORDS]
+
+[LEARNING_OBJECTIVE]
+(이 문제 세트의 학습 목표)
+[/LEARNING_OBJECTIVE]

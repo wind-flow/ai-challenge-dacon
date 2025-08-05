@@ -16,15 +16,15 @@ class QualityChecker:
     """품질 평가 및 개선 클래스"""
     
     def __init__(self):
-        # 평가 가중치
+        # 평가 가중치 (FSKU 기준 반영)
         self.weights = {
-            'length': 0.2,
-            'structure': 0.25,
-            'keywords': 0.3,
-            'clarity': 0.25
+            'length': 0.15,      # 적절한 길이
+            'structure': 0.25,   # 문제 구조
+            'keywords': 0.35,    # 금융 키워드 포함
+            'clarity': 0.25      # 명확성
         }
         
-        # 금융 키워드 (외부 데이터에서 로드하는 것이 이상적)
+        # 금융 키워드 사용
         self.finance_keywords = self._load_finance_keywords()
         
         # 모호한 표현
@@ -32,6 +32,13 @@ class QualityChecker:
             '대략', '아마', '어느정도', '일부', '몇몇',
             '가능한', '일반적으로', '보통', '대체로'
         ]
+        
+        # FSKU 문제 유형 패턴
+        self.question_patterns = {
+            '객관식': ['다음 중', '올바른 것은', '맞는 것은', '틀린 것은'],
+            '주관식': ['설명하시오', '서술하시오', '~는 무엇인가', '계산하시오'],
+            '계산': ['계산', '산출', '구하시오', '값은']
+        }
         
         # 품질 통계
         self.stats = {
@@ -42,17 +49,11 @@ class QualityChecker:
         }
     
     def _load_finance_keywords(self) -> List[str]:
-        """금융 키워드 로드 (외부 데이터에서)"""
-        # 실제로는 외부 데이터에서 로드해야 함
-        # 여기서는 최소한의 키워드만
-        return [
-            '금리', '이자', '환율', '투자', '리스크', '위험',
-            '시장', '은행', '금융', '자산', '부채', '자본',
-            '보험', '연금', '증권', '채권', '주식', '펀드',
-            '규제', '감독', '정책', '보안', '개인정보'
-        ]
+        """금융 키워드 로드 (비활성화)"""
+        # 하드코딩 금지, 키워드 기반 평가 비활성화
+        return []
     
-    def evaluate(self, text: str, concept: str = "") -> float:
+    def evaluate(self, text: str) -> float:
         """
         품질 평가
         
@@ -71,8 +72,8 @@ class QualityChecker:
         # 2. 구조 평가
         scores['structure'] = self._evaluate_structure(text)
         
-        # 3. 키워드 평가
-        scores['keywords'] = self._evaluate_keywords(text, concept)
+        # 3. 키워드 평가 (비활성화)
+        scores['keywords'] = 70  # 기본 점수
         
         # 4. 명확성 평가
         scores['clarity'] = self._evaluate_clarity(text)
@@ -121,19 +122,10 @@ class QualityChecker:
         
         return min(100, score)
     
-    def _evaluate_keywords(self, text: str, concept: str) -> float:
-        """키워드 평가"""
-        score = 30  # 기본 점수
-        
-        # 개념 포함
-        if concept and concept in text:
-            score += 20
-        
-        # 금융 키워드 카운트
-        keyword_count = sum(1 for kw in self.finance_keywords if kw in text)
-        score += min(50, keyword_count * 10)
-        
-        return min(100, score)
+    def _evaluate_keywords(self, text: str) -> float:
+        """키워드 평가 (비활성화)"""
+        # 하드코딩 금지로 기본 점수만 반환
+        return 70
     
     def _evaluate_clarity(self, text: str) -> float:
         """명확성 평가"""

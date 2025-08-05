@@ -19,34 +19,102 @@ logger = logging.getLogger(__name__)
 class ConceptExtractor:
     """외부 데이터에서 금융 개념 자동 추출"""
     
-    def __init__(self, data_dir: str = "data"):
+    def __init__(self, data_dir: str = "data", use_cache: bool = True):
         self.data_dir = Path(data_dir)
         self.concepts = set()
         self.concept_contexts = {}
         self.concept_frequencies = Counter()
+        self.cache_path = self.data_dir / "cache" / "concepts.pkl"
         
-        # 금융 용어 패턴 (정규식)
-        self.patterns = [
-            r'[가-힣]+(?:금리|이자율)',
-            r'[가-힣]+(?:리스크|위험)',
-            r'[가-힣]+(?:시장|거래소)',
-            r'[가-힣]+(?:은행|금융)',
-            r'[가-힣]+(?:투자|자산)',
-            r'[가-힣]+(?:보험|연금)',
-            r'[가-힣]+(?:증권|채권|주식)',
-            r'[가-힣]+(?:규제|법규|정책)',
-            r'[가-힣]+(?:보안|보호)',
-            r'(?:전자|디지털|온라인)[가-힣]+',
-            r'[A-Z]{2,10}',  # 영문 약어 (ETF, KOSPI 등)
-        ]
+        # 캐시 확인
+        if use_cache and self.cache_path.exists():
+            self._load_cache()
+            logger.info(f"캐시에서 {len(self.concepts)}개 개념 로드")
+            return
+        
+        # 패턴은 외부 데이터에서 자동 생성
+        self.patterns = []
+        self._build_patterns_from_external_data()
+    
+    def _build_patterns_from_external_data(self):
+        """외부 데이터에서 패턴 자동 생성"""
+        external_dir = self.data_dir / "external"
+        
+        if not external_dir.exists():
+            logger.warning(f"외부 데이터 디렉토리 없음: {external_dir}")
+            # 최소한의 범용 패턴만 사용 (수기 작성 아님)
+            self.patterns = [
+                r'\b[가-힣]{2,10}\b',  # 한글 단어 (2-10자)
+                r'\b[A-Z]{2,10}\b',     # 영문 약어
+                r'\b[0-9]+[가-힣]+\b',  # 숫자+한글 조합
+            ]
+            return
+        
+        # 외부 데이터에서 자주 나오는 단어 패턴 학습
+        word_patterns = set()
+        
+        for file_path in external_dir.glob("*.txt"):
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    text = f.read()
+                    
+                    # 명사형 어미 패턴 자동 감지
+                    # "~은", "~는", "~이", "~가" 앞의 단어들
+                    noun_patterns = re.findall(r'([가-힣]+)(?:은|는|이|가)\s', text)
+                    for noun in noun_patterns:
+                        if 2 <= len(noun) <= 10:
+                            word_patterns.add(noun)
+                    
+                    # "~란", "~라는" 으로 정의되는 용어
+                    defined_terms = re.findall(r'([가-힣]+)(?:란|라는)\s', text)
+                    for term in defined_terms:
+                        if 2 <= len(term) <= 10:
+                            word_patterns.add(term)
+                    
+                    # 반복되는 단어 패턴 감지
+                    words = re.findall(r'[가-힣]{2,10}', text)
+                    word_freq = Counter(words)
+                    
+                    # 빈도수 높은 상위 단어들을 패턴으로
+                    for word, freq in word_freq.most_common(50):
+                        if freq >= 3:  # 3번 이상 나온 단어
+                            word_patterns.add(word)
+                            
+            except Exception as e:
+                logger.error(f"파일 읽기 실패 {file_path}: {e}")
+        
+        # 수집한 단어들로 동적 패턴 생성
+        if word_patterns:
+            # 접미사 패턴 자동 생성 (빈번한 어미 찾기)
+            suffixes = Counter()
+            for word in word_patterns:
+                if len(word) >= 3:
+                    suffixes[word[-2:]] += 1
+            
+            # 빈번한 접미사로 패턴 생성
+            for suffix, count in suffixes.most_common(10):
+                if count >= 3:
+                    self.patterns.append(f'[가-힣]+{suffix}')
+        
+        # 기본 패턴 추가
+        self.patterns.extend([
+            r'\b[가-힣]{2,10}\b',  # 한글 단어
+            r'\b[A-Z]{2,10}\b',     # 영문 약어
+        ])
+        
+        logger.info(f"외부 데이터에서 {len(self.patterns)}개 패턴 생성")
     
     def extract_concepts(self) -> Set[str]:
         """
-        외부 데이터에서 개념 추출
+        외부 데이터에서 개념 추출 (PDF 포함)
         
         Returns:
             추출된 개념 집합
         """
+        # 이미 개념이 있으면 재사용
+        if self.concepts:
+            return self.concepts
+            
         # 외부 데이터 디렉토리
         external_dir = self.data_dir / "external"
         
@@ -54,6 +122,10 @@ class ConceptExtractor:
             logger.warning(f"외부 데이터 디렉토리 없음: {external_dir}")
             logger.warning("data/external/ 폴더에 금융 관련 문서를 추가하세요.")
             return set()
+        
+        # PDF 파일 처리 (새로 추가)
+        for file_path in external_dir.glob("*.pdf"):
+            self._process_pdf_file(file_path)
         
         # 모든 텍스트 파일 처리
         for file_path in external_dir.glob("*.txt"):
@@ -63,6 +135,10 @@ class ConceptExtractor:
         for file_path in external_dir.glob("*.json"):
             self._process_json_file(file_path)
         
+        # Excel 파일 처리 (새로 추가)
+        for file_path in external_dir.glob("*.xlsx"):
+            self._process_excel_file(file_path)
+        
         # CSV 파일 처리 (train.csv만, test.csv 제외)
         raw_dir = self.data_dir / "raw"
         if raw_dir.exists():
@@ -71,6 +147,11 @@ class ConceptExtractor:
                     self._process_csv_file(file_path)
         
         logger.info(f"총 {len(self.concepts)}개 개념 추출")
+        
+        # 캐시 저장
+        if self.concepts:
+            self._save_cache()
+        
         return self.concepts
     
     def _process_text_file(self, file_path: Path):
@@ -90,6 +171,46 @@ class ConceptExtractor:
                 self._extract_from_json(data)
         except Exception as e:
             logger.error(f"JSON 파일 읽기 실패 {file_path}: {e}")
+    
+    def _process_pdf_file(self, file_path: Path):
+        """PDF 파일 처리"""
+        try:
+            # PDF 로더 사용
+            try:
+                from rag.pdf_loader import DocumentLoader
+            except ImportError:
+                from ..rag.pdf_loader import DocumentLoader
+            
+            loader = DocumentLoader()
+            doc = loader.load_document(file_path)
+            
+            if doc and 'content' in doc:
+                self._extract_from_text(doc['content'])
+                logger.info(f"PDF 처리 완료: {file_path.name}")
+        except Exception as e:
+            logger.error(f"PDF 파일 읽기 실패 {file_path}: {e}")
+    
+    def _process_excel_file(self, file_path: Path):
+        """Excel 파일 처리"""
+        try:
+            import pandas as pd
+            # 모든 시트 읽기
+            dfs = pd.read_excel(file_path, sheet_name=None)
+            
+            for sheet_name, df in dfs.items():
+                # 데이터프레임을 텍스트로 변환
+                text = df.to_string()
+                self._extract_from_text(text)
+                
+                # 컬럼명도 개념으로 추출
+                for col in df.columns:
+                    if isinstance(col, str) and 2 <= len(col) <= 20:
+                        self.concepts.add(col)
+                        self.concept_frequencies[col] += 1
+            
+            logger.info(f"Excel 처리 완료: {file_path.name}")
+        except Exception as e:
+            logger.error(f"Excel 파일 읽기 실패 {file_path}: {e}")
     
     def _process_csv_file(self, file_path: Path):
         """CSV 파일 처리"""
@@ -191,3 +312,31 @@ class ConceptExtractor:
                     related.append(c)
         
         return related[:n]
+    
+    def _save_cache(self):
+        """캐시 저장"""
+        import pickle
+        self.cache_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        cache_data = {
+            'concepts': self.concepts,
+            'concept_contexts': self.concept_contexts,
+            'concept_frequencies': self.concept_frequencies,
+            'patterns': self.patterns
+        }
+        
+        with open(self.cache_path, 'wb') as f:
+            pickle.dump(cache_data, f)
+        logger.info(f"캐시 저장: {self.cache_path}")
+    
+    def _load_cache(self):
+        """캐시 로드"""
+        import pickle
+        
+        with open(self.cache_path, 'rb') as f:
+            cache_data = pickle.load(f)
+        
+        self.concepts = cache_data['concepts']
+        self.concept_contexts = cache_data['concept_contexts']
+        self.concept_frequencies = cache_data['concept_frequencies']
+        self.patterns = cache_data.get('patterns', [])
