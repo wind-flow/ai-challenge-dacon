@@ -42,9 +42,9 @@ outputs/
 *.swo
 .DS_Store
 
-# Jupyter
-.ipynb_checkpoints/
-*.ipynb
+# # Jupyter
+# .ipynb_checkpoints/
+# *.ipynb
 
 # 환경 설정
 .env
