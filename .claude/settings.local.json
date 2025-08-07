@@ -18,7 +18,23 @@
       "Bash(git rm:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "mcp__ide__executeCode"
+      "mcp__ide__executeCode",
+      "Bash(winget install:*)",
+      "Bash(gh:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(curl:*)",
+      "Bash(msiexec:*)",
+      "Bash(powershell.exe:*)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/GitHub CLI\")",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(bash:*)",
+      "Bash(export PATH=\"$PATH:/c/Users/admin/.local/bin\")",
+      "Bash(claude-squad --version)",
+      "Bash(uv add:*)",
+      "Bash(uv pip install:*)",
+      "Bash(uv venv:*)",
+      "Bash(source:*)",
+      "Bash(git clone:*)"
     ],
     "deny": []
   }
