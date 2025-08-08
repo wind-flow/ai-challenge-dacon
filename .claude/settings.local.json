@@ -34,7 +34,8 @@
       "Bash(uv pip install:*)",
       "Bash(uv venv:*)",
       "Bash(source:*)",
-      "Bash(git clone:*)"
+      "Bash(git clone:*)",
+      "Bash(jupyter nbconvert:*)"
     ],
     "deny": []
   }
